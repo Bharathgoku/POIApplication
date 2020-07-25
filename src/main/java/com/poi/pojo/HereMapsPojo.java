@@ -17,6 +17,7 @@ public class HereMapsPojo {
   private Results results;
 
   @Data
+  @Builder
   @NoArgsConstructor
   @AllArgsConstructor
   public static class Results{
@@ -24,6 +25,7 @@ public class HereMapsPojo {
   }
 
   @Data
+  @Builder
   @NoArgsConstructor
   @AllArgsConstructor
   public static class Item{

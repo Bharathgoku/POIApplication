@@ -1,0 +1,66 @@
+package tests;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.when;
+
+import com.poi.dto.PointsOfInterestResponseDto.POI;
+import com.poi.enums.Category;
+import com.poi.external.hereMaps.HereMapsClient;
+import com.poi.pojo.GeoCoderPojo.Geometry;
+import com.poi.pojo.HereMapsPojo;
+import com.poi.pojo.HereMapsPojo.Item;
+import com.poi.pojo.HereMapsPojo.Results;
+import com.poi.service.IPointsOfInterestService;
+import com.poi.service.PointsOfInterestService;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import org.junit.Before;
+import org.junit.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.MockitoAnnotations;
+
+public class IPointsOfInterestServiceTest {
+
+    @InjectMocks
+    private IPointsOfInterestService pointsOfInterestService;
+
+    @Mock
+    private HereMapsClient hereMapsClient;
+
+    @Before
+    public void setUp() {
+        MockitoAnnotations.initMocks(this);
+    }
+
+
+    @Test
+    public void testGetTopK() throws ExecutionException, InterruptedException {
+
+        Geometry geometry = Geometry.getObject(Arrays.asList(17.3616079, 78.4746286));
+        Integer K = 1;
+        Category category = Category.RESTAURANTS;
+        Item item = Item.builder()
+                            .distance(736)
+                            .href("https://places.demo.api.here.com/places/v1/places/356t4x7z-78b4458d6ea60203ced5561ce4657c91;context=Zmxvdy1pZD0xOGUyYmI1OC0wYWI0LTU5ODctOTM0NS1hNGIzOWZlMTYyYWRfMTU5NTY3Njc1NTA3OV8wXzIyOTQmcmFuaz0x?app_id=DemoAppId01082013GAL&app_code=AJKnXv84fjrb0KIHawS0T")
+                            .position(Arrays.asList(17.355109, 78.473301))
+                            .title("Shah Ghouse Cafe").build();
+        POI poi = POI.getObject(item);
+        List<POI> expectedList = Arrays.asList(poi);
+        HereMapsPojo hereMapsPojo = HereMapsPojo.builder()
+                                                .results(Results.builder().items(Arrays.asList(item)).build())
+                                                .build();
+        when(hereMapsClient.getPoiByCategory(geometry, category)).thenReturn(hereMapsPojo);
+        List<POI> poiList = pointsOfInterestService.getTopK(geometry, K, category).get();
+
+        assertNotNull(poiList);
+        assertEquals(expectedList, poiList);
+
+    }
+}

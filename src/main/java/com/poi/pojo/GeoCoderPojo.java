@@ -20,6 +20,7 @@ public class GeoCoderPojo {
   private List<Result> resultList;
 
   @Data
+  @Builder
   @NoArgsConstructor
   @AllArgsConstructor
   public static class Result{

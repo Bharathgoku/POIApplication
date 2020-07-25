@@ -43,21 +43,5 @@ public class HttpRequestUtil {
     }
   }
 
-  public <T> T getApiResponse(
-      URI uri, HttpHeaders headers, ParameterizedTypeReference<T> responseClass)
-      throws RestClientResponseException {
-    log.debug("Get Api url : " + uri.toString());
-    RestTemplate restTemplate = this.restTemplate;
-    try {
-      ResponseEntity<T> responseEntity =
-          restTemplate.exchange(
-              uri, HttpMethod.GET, new HttpEntity<T>(headers), responseClass);
-      return responseEntity.getBody();
-    } catch (RestClientResponseException rCREX) {
-      log.error("RestClientResponseException while trying to hit URI : " + uri, rCREX);
-      throw rCREX;
-    }
-  }
-
 
 }
