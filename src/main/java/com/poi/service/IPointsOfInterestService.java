@@ -1,13 +1,27 @@
 package com.poi.service;
 
+import com.poi.dto.PointsOfInterestResponseDto;
+import com.poi.dto.PointsOfInterestResponseDto.POI;
 import com.poi.enums.Category;
+import com.poi.exceptions.InternalServerException;
+import com.poi.exceptions.InvalidCityException;
 import com.poi.external.geoCoder.GeoCoderClient;
 import com.poi.external.hereMaps.HereMapsClient;
 import com.poi.pojo.GeoCoderPojo.Geometry;
 import com.poi.pojo.HereMapsPojo;
+import com.poi.pojo.HereMapsPojo.Item;
+import com.sun.tools.javac.jvm.Items;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
+import org.springframework.web.client.RestClientResponseException;
 
 @Service
 public class IPointsOfInterestService implements PointsOfInterestService{
@@ -19,27 +33,53 @@ public class IPointsOfInterestService implements PointsOfInterestService{
   private HereMapsClient hereMapsClient;
 
   @Override
-  public void getPoiByCityName(String cityName) throws Exception {
+  public PointsOfInterestResponseDto getPoiByCityName(String cityName) throws InvalidCityException, InternalServerException, RuntimeException {
+
+    PointsOfInterestResponseDto pointsOfInterestResponseDto = null;
 
     Geometry geometry = geoCoderClient.getGeometry(cityName);
 
     if(geometry == null){
-      throw new Exception();
+      throw new InvalidCityException("Invalid city , city Name - " + cityName);
     }
 
-    // call for restaurants
-    CompletableFuture<HereMapsPojo> restaurants = hereMapsClient.getPoiByCategory(geometry, Category.RESTAURANTS);
+    try {
+      CompletableFuture<List<POI>> topRestaurants = getTopK(geometry,  3, Category.RESTAURANTS);
+      CompletableFuture<List<POI>> topChargingStations = getTopK(geometry, 3, Category.CHARGING_STATIONS);
+      CompletableFuture<List<POI>> topParkingSpots = getTopK(geometry, 3, Category.PARKING_FACILITY);
 
-    // get the top 3
+      Map<Category, List<POI>> poiMap = new HashMap<Category, List<POI>>();
 
-    // call for charging stations
-    CompletableFuture<HereMapsPojo> charginStations = hereMapsClient.getPoiByCategory(geometry, Category.CHARGING_STATIONS);
+      poiMap.put(Category.RESTAURANTS, topRestaurants.get());
+      poiMap.put(Category.CHARGING_STATIONS, topChargingStations.get());
+      poiMap.put(Category.PARKING_FACILITY, topParkingSpots.get());
 
-    // get top 3
+      pointsOfInterestResponseDto = PointsOfInterestResponseDto.createResponse(cityName, geometry, poiMap);
 
-    // call for parking spots
-    CompletableFuture<HereMapsPojo> parkingSpots = hereMapsClient.getPoiByCategory(geometry, Category.PARKING_SPOTS);
+    }catch (Exception e) {
+      throw new InternalServerException();
+    }
 
-    // get top 3
+    return pointsOfInterestResponseDto;
+  }
+
+  @Async
+  public CompletableFuture<List<POI>> getTopK(Geometry geometry, Integer K, Category category){
+    HereMapsPojo hereMapsPojo = null;
+    try{
+       hereMapsPojo = hereMapsClient.getPoiByCategory(geometry, category);
+    }catch(RestClientResponseException e){
+      throw new InternalServerException(e.getMessage());
+    }
+    List<POI> poiList = new ArrayList<>();
+
+    if(hereMapsPojo != null && hereMapsPojo.getResults() != null && !CollectionUtils.isEmpty(hereMapsPojo.getResults().getItems())){
+
+      List<Item> items = hereMapsPojo.getResults().getItems();
+      poiList = items.stream().limit(K).map(POI::getObject).collect(Collectors.toList());
+    }
+
+    return CompletableFuture.completedFuture(poiList);
+
   }
 }

@@ -22,10 +22,10 @@ public class HereMapsClient {
   @Autowired
   HttpRequestUtil httpRequestUtil;
 
-  @Async
   @Cacheable("pointsOfInterest")
-  public CompletableFuture<HereMapsPojo> getPoiByCategory(Geometry geometry, Category cat) {
-    String url = "https://places.ls.hereapi.com/places/v1/discover/explore";
+  public HereMapsPojo getPoiByCategory(Geometry geometry, Category cat) {
+
+    String url = "https://places.demo.api.here.com/places/v1/discover/explore";
     HttpHeaders headers = getRequestHeaders();
 
     HereMapsPojo hereMapsPojo = null;
@@ -33,13 +33,14 @@ public class HereMapsClient {
         UriComponentsBuilder.fromUriString(url)
             .queryParam("at", geometry.toString())
             .queryParam("cat", cat.getCatCode())
-            .queryParam("api_key", "H6XyiCT0w1t9GgTjqhRXxDMrVj9h78ya3NuxlwM7XUs")
+            .queryParam("app_id", "DemoAppId01082013GAL")
+            .queryParam("app_code", "AJKnXv84fjrb0KIHawS0Tg")
             .build()
             .toUri();
 
     hereMapsPojo = httpRequestUtil.getApiResponse(uri, headers, HereMapsPojo.class);
 
-    return CompletableFuture.completedFuture(hereMapsPojo);
+    return hereMapsPojo;
   }
 
   private HttpHeaders getRequestHeaders() {

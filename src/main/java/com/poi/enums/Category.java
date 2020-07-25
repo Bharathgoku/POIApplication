@@ -1,9 +1,9 @@
 package com.poi.enums;
 
 public enum Category {
-  RESTAURANTS("restaurants"),
-  CHARGING_STATIONS("charging_stations"),
-  PARKING_SPOTS("parking_spots");
+  RESTAURANTS("restaurant"),
+  CHARGING_STATIONS("ev-charging-station"),
+  PARKING_FACILITY("parking-facility");
 
   private String catCode;
 

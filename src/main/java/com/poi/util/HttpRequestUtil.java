@@ -32,7 +32,6 @@ public class HttpRequestUtil {
       throws RestClientResponseException {
     log.debug("Get Api url : " + uri.toString());
     RestTemplate restTemplate = this.restTemplate;
-    //    TODO: response error handling
     try {
       ResponseEntity<T> responseEntity =
           restTemplate.exchange(
@@ -49,7 +48,6 @@ public class HttpRequestUtil {
       throws RestClientResponseException {
     log.debug("Get Api url : " + uri.toString());
     RestTemplate restTemplate = this.restTemplate;
-    //    TODO: response error handling
     try {
       ResponseEntity<T> responseEntity =
           restTemplate.exchange(

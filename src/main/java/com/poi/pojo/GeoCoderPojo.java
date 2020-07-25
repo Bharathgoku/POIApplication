@@ -20,7 +20,6 @@ public class GeoCoderPojo {
   private List<Result> resultList;
 
   @Data
-
   @NoArgsConstructor
   @AllArgsConstructor
   public static class Result{
@@ -30,6 +29,7 @@ public class GeoCoderPojo {
   }
 
   @Data
+  @Builder
   @NoArgsConstructor
   @AllArgsConstructor
   public static class Geometry{
@@ -39,6 +39,13 @@ public class GeoCoderPojo {
     @Override
     public String toString(){
       return new String(lat.toString() + "," + lng.toString());
+    }
+
+    public static Geometry getObject(List<Double> position){
+      return Geometry.builder()
+                    .lat(position.get(0))
+                    .lng(position.get(1))
+                    .build();
     }
   }
 
