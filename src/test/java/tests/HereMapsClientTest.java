@@ -7,9 +7,7 @@ import static org.mockito.Mockito.when;
 
 import com.poi.enums.Category;
 import com.poi.external.hereMaps.HereMapsClient;
-import com.poi.pojo.GeoCoderPojo;
 import com.poi.pojo.GeoCoderPojo.Geometry;
-import com.poi.pojo.GeoCoderPojo.Result;
 import com.poi.pojo.HereMapsPojo;
 import com.poi.pojo.HereMapsPojo.Item;
 import com.poi.pojo.HereMapsPojo.Results;

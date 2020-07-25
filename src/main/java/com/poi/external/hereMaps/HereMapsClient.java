@@ -9,6 +9,7 @@ import java.net.URI;
 import java.util.Arrays;
 import java.util.concurrent.CompletableFuture;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -19,22 +20,30 @@ import org.springframework.web.util.UriComponentsBuilder;
 @Component
 public class HereMapsClient {
 
+  @Value("${here.maps.app.id}")
+  private static String APP_ID;
+
+  @Value("${here.maps.app.code}")
+  private static String APP_CODE;
+
+  @Value("${here.maps.api.base.url}")
+  private String hereMapsBaseUrl;
+
   @Autowired
   HttpRequestUtil httpRequestUtil;
 
   @Cacheable("pointsOfInterest")
   public HereMapsPojo getPoiByCategory(Geometry geometry, Category cat) {
 
-    String url = "https://places.demo.api.here.com/places/v1/discover/explore";
     HttpHeaders headers = getRequestHeaders();
 
     HereMapsPojo hereMapsPojo = null;
     URI uri =
-        UriComponentsBuilder.fromUriString(url)
+        UriComponentsBuilder.fromUriString(hereMapsBaseUrl)
             .queryParam("at", geometry.toString())
             .queryParam("cat", cat.getCatCode())
-            .queryParam("app_id", "DemoAppId01082013GAL")
-            .queryParam("app_code", "AJKnXv84fjrb0KIHawS0Tg")
+            .queryParam("app_id", APP_ID)
+            .queryParam("app_code", APP_CODE)
             .build()
             .toUri();
 
