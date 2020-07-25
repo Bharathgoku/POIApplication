@@ -21,7 +21,7 @@ public class GeoCoderClient {
   HttpRequestUtil httpRequestUtil;
 
   @Value("${geo-coding.api.key}")
-  private static String API_KEY;
+  private String API_KEY;
 
   @Value("${geo-coding.api.base.url}")
   private String geoCodingBaseUrl;

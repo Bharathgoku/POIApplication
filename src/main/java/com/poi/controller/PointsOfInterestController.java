@@ -27,6 +27,7 @@ public class PointsOfInterestController {
   @GetMapping(value = "/get_top")
   public ServiceResponse<BaseResponse<PointsOfInterestResponseDto>> getPoiByCityName(@RequestParam(value = "city_name") String cityName) throws RuntimeException{
     try{
+      log.info("[POI - GET ByCity Request] - RequestParam:{city_name : " + cityName + "}");
       return new ServiceResponse<>(new BaseResponse<>(pointsOfInterestService.getPoiByCityName(cityName)));
     }catch(InvalidCityException e){
       return new ServiceResponse<>(new BaseResponse<>(HttpStatus.BAD_REQUEST.value(), e.getMessage(), null), HttpStatus.BAD_REQUEST);

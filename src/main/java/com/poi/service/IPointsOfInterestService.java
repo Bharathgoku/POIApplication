@@ -12,17 +12,20 @@ import com.poi.pojo.HereMapsPojo;
 import com.poi.pojo.HereMapsPojo.Item;
 import com.sun.tools.javac.jvm.Items;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.client.RestClientResponseException;
 
+@Slf4j
 @Service
 public class IPointsOfInterestService implements PointsOfInterestService{
 
@@ -33,13 +36,14 @@ public class IPointsOfInterestService implements PointsOfInterestService{
   private HereMapsClient hereMapsClient;
 
   @Override
-  public PointsOfInterestResponseDto getPoiByCityName(String cityName) throws InvalidCityException, InternalServerException, RuntimeException {
+  public PointsOfInterestResponseDto getPoiByCityName(String cityName) throws RuntimeException {
 
     PointsOfInterestResponseDto pointsOfInterestResponseDto = null;
 
     Geometry geometry = geoCoderClient.getGeometry(cityName);
 
     if(geometry == null){
+      log.error("Invalid city name - " + cityName);
       throw new InvalidCityException("Invalid city , city Name - " + cityName);
     }
 
@@ -57,7 +61,8 @@ public class IPointsOfInterestService implements PointsOfInterestService{
       pointsOfInterestResponseDto = PointsOfInterestResponseDto.createResponse(cityName, geometry, poiMap);
 
     }catch (Exception e) {
-      throw new InternalServerException();
+      log.error("Error occured in POI Service, cityName - " + cityName + ", error message - " + e.getMessage());
+      throw new InternalServerException(e.getMessage());
     }
 
     return pointsOfInterestResponseDto;
@@ -69,6 +74,7 @@ public class IPointsOfInterestService implements PointsOfInterestService{
     try{
        hereMapsPojo = hereMapsClient.getPoiByCategory(geometry, category);
     }catch(RestClientResponseException e){
+      log.error("RestClient Exception, error message - " + e.getMessage());
       throw new InternalServerException(e.getMessage());
     }
     List<POI> poiList = new ArrayList<>();
@@ -76,9 +82,12 @@ public class IPointsOfInterestService implements PointsOfInterestService{
     if(hereMapsPojo != null && hereMapsPojo.getResults() != null && !CollectionUtils.isEmpty(hereMapsPojo.getResults().getItems())){
 
       List<Item> items = hereMapsPojo.getResults().getItems();
-      poiList = items.stream().limit(K).map(POI::getObject).collect(Collectors.toList());
+      // here maps results are ranked based on category distance, so no need to loop over all the poi.
+      poiList = items.stream().limit(K).map(POI::getObject).sorted(
+          Comparator.comparingInt(POI::getDistance)).collect(Collectors.toList());
+    }else{
+      log.info("Empty Here maps client object");
     }
-
     return CompletableFuture.completedFuture(poiList);
 
   }

@@ -21,10 +21,10 @@ import org.springframework.web.util.UriComponentsBuilder;
 public class HereMapsClient {
 
   @Value("${here.maps.app.id}")
-  private static String APP_ID;
+  private String APP_ID;
 
   @Value("${here.maps.app.code}")
-  private static String APP_CODE;
+  private String APP_CODE;
 
   @Value("${here.maps.api.base.url}")
   private String hereMapsBaseUrl;
