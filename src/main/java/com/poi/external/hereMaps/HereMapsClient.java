@@ -20,14 +20,11 @@ import org.springframework.web.util.UriComponentsBuilder;
 @Component
 public class HereMapsClient {
 
-  @Value("${here.maps.app.id}")
-  private String APP_ID;
+  private static final String APP_ID = "DemoAppId01082013GAL";
 
-  @Value("${here.maps.app.code}")
-  private String APP_CODE;
+  private static final String APP_CODE = "AJKnXv84fjrb0KIHawS0Tg";
 
-  @Value("${here.maps.api.base.url}")
-  private String hereMapsBaseUrl;
+  private String hereMapsBaseUrl = "https://places.demo.api.here.com/places/v1/discover/explore";
 
   @Autowired
   HttpRequestUtil httpRequestUtil;

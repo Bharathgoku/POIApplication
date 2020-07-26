@@ -20,11 +20,9 @@ public class GeoCoderClient {
   @Autowired
   HttpRequestUtil httpRequestUtil;
 
-  @Value("${geo-coding.api.key}")
-  private String API_KEY;
+  private static final String API_KEY = "4a1399d28687498f98945dd5d72bdc84";
 
-  @Value("${geo-coding.api.base.url}")
-  private String geoCodingBaseUrl;
+  private static final String geoCodingBaseUrl = "https://api.opencagedata.com/geocode/v1/json";
 
   @Cacheable("geoCoding")
   public Geometry getGeometry(String cityName){
